@@ -1,0 +1,67 @@
+print("Welcome to the Daily Calorie Tracker!")
+print("This tool helps you log your meals.")
+print()
+
+all_meal_names = []
+all_calorie_amounts = []
+total_calories = 0
+
+num_meals = int(input("How many meals do you want to enter? "))
+print()
+
+for i in range(num_meals):
+    print("Entering meal #", i + 1)
+    meal = input("What was the meal (ex. Breakfast)? ")
+    calories = int(input("How many calories? "))
+
+    all_meal_names.append(meal)
+    all_calorie_amounts.append(calories)
+    total_calories = total_calories + calories
+    print()
+
+daily_limit = int(input("What is your daily calorie limit? "))
+print()
+
+if num_meals > 0:
+    average_calories = total_calories / num_meals
+else:
+    average_calories = 0
+
+print("Your Daily Summary:")
+print("Meal Name\tCalories") 
+
+for i in range(len(all_meal_names)):
+    print(f"{all_meal_names[i]}\t\t{all_calorie_amounts[i]}")
+
+print()
+print(f"Total Calories: {total_calories}")
+print(f"Average Calories: {average_calories}")
+print()
+
+if total_calories > daily_limit:
+    print("WARNING: You went over your daily limit!")
+else:
+    print("Good job! You are within your daily limit.")
+
+print()
+save_file = input("Do you want to save this log? (yes/no): ")
+
+if save_file == "yes":
+    file = open("calorie_log.txt", "w")
+    
+    file.write("Calorie Log:\n")
+    for i in range(len(all_meal_names)):
+        file.write(f"{all_meal_names[i]}: {all_calorie_amounts[i]}\n")
+    
+    file.write(f"Total: {total_calories}\n")
+    file.write(f"Limit: {daily_limit}\n")
+    
+    if total_calories > daily_limit:
+        file.write("Status: Over limit.\n")
+    else:
+        file.write("Status: Under limit.\n")
+    
+    file.close()
+    print("Log saved to calorie_log.txt")
+else:
+    print("Log not saved. Goodbye!")
