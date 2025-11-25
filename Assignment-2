@@ -1,0 +1,177 @@
+import csv
+import os
+
+def calculate_average(marks):
+    if not marks:
+        return 0.0
+    return sum(marks) / len(marks)
+
+def calculate_median(marks):
+    if not marks:
+        return 0.0
+    sorted_marks = sorted(marks)
+    n = len(sorted_marks)
+    mid_index = n // 2
+    
+    if n % 2 == 1:
+        return sorted_marks[mid_index]
+    else:
+        return (sorted_marks[mid_index - 1] + sorted_marks[mid_index]) / 2
+
+def find_max_score(marks_dict):
+    if not marks_dict:
+        return None, 0
+    max_val = -1
+    max_student = ""
+    for name, score in marks_dict.items():
+        if score > max_val:
+            max_val = score
+            max_student = name
+    return max_student, max_val
+
+def find_min_score(marks_dict):
+    if not marks_dict:
+        return None, 0
+    min_val = 101
+    min_student = ""
+    for name, score in marks_dict.items():
+        if score < min_val:
+            min_val = score
+            min_student = name
+    return min_student, min_val
+
+def determine_grade(score):
+    if score >= 90:
+        return 'A'
+    elif score >= 80:
+        return 'B'
+    elif score >= 70:
+        return 'C'
+    elif score >= 60:
+        return 'D'
+    else:
+        return 'F'
+
+def analyze_data(marks_dict):
+    grades = {}
+    distribution = {'A': 0, 'B': 0, 'C': 0, 'D': 0, 'F': 0}
+    passed_students = []
+    failed_students = []
+    
+    for name, score in marks_dict.items():
+        grade = determine_grade(score)
+        grades[name] = grade
+        distribution[grade] += 1
+        
+        if score >= 40:
+            passed_students.append(name)
+        else:
+            failed_students.append(name)
+            
+    return grades, distribution, passed_students, failed_students
+
+def get_manual_input():
+    marks_data = {}
+    print("\nManual Data Entry")
+    print("Type 'done' as the name to finish entry.")
+    
+    while True:
+        name = input("Enter Student Name: ").strip()
+        if name.lower() == 'done':
+            break
+        try:
+            score = float(input(f"Enter marks for {name}: "))
+            if 0 <= score <= 100:
+                marks_data[name] = score
+            else:
+                print("Error: Marks must be between 0 and 100.")
+        except ValueError:
+            print("Error: Please enter a valid number for marks.")
+            
+    return marks_data
+
+def get_csv_input():
+    filename = input("Enter CSV filename (e.g., students.csv): ").strip()
+    marks_data = {}
+    
+    if not os.path.exists(filename):
+        print(f"Error: File '{filename}' not found.")
+        return {}
+    
+    try:
+        with open(filename, mode='r') as file:
+            reader = csv.reader(file)
+            next(reader, None)
+            for row in reader:
+                if len(row) >= 2:
+                    name = row[0].strip()
+                    try:
+                        score = float(row[1].strip())
+                        marks_data[name] = score
+                    except ValueError:
+                        print(f"Skipping invalid score for {name}")
+        print("CSV loaded successfully.")
+    except Exception as e:
+        print(f"Error reading CSV: {e}")
+        
+    return marks_data
+
+def main():
+    print("   Welcome to GradeBook Analyzer CLI    ")
+
+    while True:
+        print("\nChoose Input Method:")
+        print("1. Manual Entry")
+        print("2. Load from CSV")
+        print("3. Exit")
+        
+        choice = input("Enter choice (1-3): ")
+        
+        marks_dict = {}
+        
+        if choice == '1':
+            marks_dict = get_manual_input()
+        elif choice == '2':
+            marks_dict = get_csv_input()
+        elif choice == '3':
+            print("Exiting GradeBook Analyzer. Goodbye! 👋")
+            break
+        else:
+            print("Invalid choice. Please try again.")
+            continue
+            
+        if marks_dict:
+            marks_list = list(marks_dict.values())
+
+            avg = calculate_average(marks_list)
+            med = calculate_median(marks_list)
+            max_student, max_val = find_max_score(marks_dict)
+            min_student, min_val = find_min_score(marks_dict)
+            
+            grades, dist, passed, failed = analyze_data(marks_dict)
+            
+            print("\n" + "="*50)
+            print(f"{'Name':<20} {'Marks':<10} {'Grade':<5}")
+            print("-" * 50)
+            for name, score in marks_dict.items():
+                print(f"{name:<20} {score:<10.1f} {grades[name]:<5}")
+            print("=" * 50)
+            
+            print("\nStatistical Summary")
+            print(f"Class Average: {avg:.2f}")
+            print(f"Median Score : {med:.2f}")
+            print(f"Highest Score: {max_val:.1f} ({max_student})")
+            print(f"Lowest Score : {min_val:.1f} ({min_student})")
+            
+            print("\nGrade Distribution")
+            for grade, count in dist.items():
+                print(f"Grade {grade}: {count} students")
+                
+            print("\nPass/Fail Status")
+            print(f"Passed ({len(passed)} students): {', '.join(passed)}")
+            print(f"Failed ({len(failed)} students): {', '.join(failed)}")
+            
+            input("\nAnalysis complete! Press Enter to return to main menu...")
+
+if __name__ == "__main__":
+    main()
